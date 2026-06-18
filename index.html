@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entorno de Pruebas - Mi Agente IA</title>
+    <title>Entorno de Pruebas v2 - Mi Agente IA</title>
 
     <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9;">
+<body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f6f9;">
 
     <div style="max-width: 600px; margin: 150px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h1 style="color: #1a73e8; margin-bottom: 10px;">🚀 ¡Tu Agente está en línea!</h1>
-        <p style="color: #5f6368; font-size: 16px;">Interactúa con el asistente usando la burbuja de chat flotante que aparece abajo a la derecha.</p>
+        <h1 style="color: #1a73e8; margin-bottom: 10px;">🚀 Chat v2 Activo (Sin reCAPTCHA)</h1>
+        <p style="color: #5f6368; font-size: 16px;">Prueba interactuar libremente con el bot abajo a la derecha.</p>
     </div>
 
     <script>
-      window.addEventListener("chat-messenger-loaded", () => {
-        chatSdk.registerContext(
-          chatSdk.prebuilts.ces.createContext({
-            deploymentName: "projects/86171080709/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/deployments/a9dfc250-a12d-4060-940d-8314b6832755",
-            tokenBroker: {
-              enableTokenBroker: true,
-              enableRecaptcha: true
-            }
-          }),
-        );
-      });
+        window.addEventListener("chat-messenger-loaded", () => {
+          chatSdk.registerContext(
+            chatSdk.prebuilts.ces.createContext({
+              deploymentName: "projects/86171080709/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/deployments/aa99e708-daf9-450d-9816-c9694ff7e02d",
+              tokenBroker: {
+                enableTokenBroker: true,
+                enableRecaptcha: false
+              }
+            }),
+          );
+        });
     </script>
 
     <chat-messenger url-allowlist="*">
