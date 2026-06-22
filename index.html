@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entorno de Pruebas v2 - Mi Agente IA</title>
 
-    <!-- Librerías oficiales del Chat de Google -->
     <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
@@ -30,7 +29,6 @@
             }),
           );
 
-          // === SECCIÓN CORREGIDA SEGÚN LA INTEGRACIÓN OFICIAL ===
           const chatMessenger = document.querySelector('chat-messenger');
           
           chatMessenger.registerClientSideFunction(
@@ -39,15 +37,11 @@
             async (args) => {
               
               console.log('¡Señal de video interceptada con éxito!', {args});
-              
-              // Extraemos el parámetro que envía el Agente
               const preguntaUsuario = args.pregunta;
-              
-              // Tu ID de carpeta de Drive corporativo
               const ID_CARPETA_DRIVE = "19UzWlR5bdEEMy9_uLW68yUGJZHQ_8Pcz"; 
 
               try {
-                // 1. Buscar el video más reciente en la carpeta de Enersinc
+                // 1. Buscar el video más reciente en Google Drive
                 const responseDrive = await fetch(`https://www.googleapis.com/drive/v3/files?q='${ID_CARPETA_DRIVE}'+in+parents+and+mimeType+contains+'video/'&orderBy=modifiedTime+desc&pageSize=1`, {
                    headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
                 });
@@ -59,44 +53,68 @@
 
                 const fileId = dataDrive.files[0].id;
 
-                // 2. Descargar el archivo binario (Blob)
+                // 2. Descargar el archivo de video (Blob)
                 const resVideo = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
                    headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
                 });
                 const videoBlob = await resVideo.blob();
 
-                // 3. Codificar en Base64 para Gemini
+                // 3. Convertir a Base64
                 const reader = new FileReader();
                 const base64Video = await new Promise((resolve) => {
                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
                    reader.readAsDataURL(videoBlob);
                 });
 
-                // Inyección del mega prompt multimodal junto con el video estructurado
-                return { 
-                   inlineData: { data: base64Video, mimeType: "video/mp4" },
-                   prompt: `
-                     DIRECTRICES DE ANÁLISIS DE ALTA FIDELIDAD PARA VIDEOS LARGOS:
-                     Estás analizando un video técnico de la empresa. Procesa el archivo adjunto bajo este estricto protocolo:
-                     1. ESCANEO DEL 100%: Revisa el video completo de principio a fin, incluyendo partes medias y finales.
-                     2. ENFOQUE MULTIMODAL: Correlaciona el audio (voz) con lo visual (textos en pantalla, diapositivas y clics del cursor).
-                     3. MARCAS DE TIEMPO OBLIGATORIAS: Toda afirmación o paso debe incluir su estampa de tiempo exacta entre corchetes, formateada como [Minuto MM:SS] o [Hora HH:MM:SS].
-                     4. PASO A PASO INDEXADO: Estructura la respuesta en una lista ordenada (1., 2., 3.) detallando las acciones.
-                     5. CONTROL DE ALUCINACIONES: Si la duda no está en el video, di: "Ese detalle específico no se encuentra documentado en el video analizado".
-                     
-                     Pregunta a resolver: ${preguntaUsuario}
-                   `
+                // 4. LLAMADA DIRECTA A GEMINI DESDE EL CLIENTE
+                // Reemplaza AQUÍ con tu API Key de Google AI Studio o Vertex AI
+                const API_KEY_GEMINI = "TU_API_KEY_DE_GEMINI"; 
+                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`;
+
+                const megaPrompt = `
+                  DIRECTRICES DE ANÁLISIS DE ALTA FIDELIDAD PARA VIDEOS LARGOS:
+                  Estás analizando un video técnico de la empresa. Procesa el archivo adjunto bajo este estricto protocolo:
+                  1. ESCANEO DEL 100%: Revisa el video completo de principio a fin, incluyendo partes medias y finales.
+                  2. ENFOQUE MULTIMODAL: Correlaciona el audio (voz) con lo visual (textos en pantalla, diapositivas y clics del cursor).
+                  3. MARCAS DE TIEMPO OBLIGATORIAS: Toda afirmación o paso debe incluir su estampa de tiempo exacta entre corchetes, formateada como [Minuto MM:SS] o [Hora HH:MM:SS].
+                  4. PASO A PASO INDEXADO: Estructura la respuesta en una lista ordenada (1., 2., 3.) detallando las acciones.
+                  5. CONTROL DE ALUCINACIONES: Si la duda no está en el video, di: "Ese detalle específico no se encuentra documentado en el video analizado".
+                  
+                  Pregunta a resolver: ${preguntaUsuario}
+                `;
+
+                const payload = {
+                  contents: [{
+                    parts: [
+                      { inlineData: { data: base64Video, mimeType: "video/mp4" } },
+                      { text: megaPrompt }
+                    ]
+                  }]
                 };
 
+                const resGemini = await fetch(urlGemini, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload)
+                });
+
+                const dataGemini = await resGemini.json();
+                
+                // Extraemos el texto que generó Gemini al ver el video
+                const textoRespuesta = dataGemini.candidates[0].content.parts[0].text;
+
+                // 5. DEVOLVER LA RESPUESTA FINAL EN TEXTO A DIALOGFLOW CX
+                return { respuesta: textoRespuesta };
+
               } catch (error) {
-                return { respuesta: "Error al procesar el archivo en Google Drive. Verifica que tu sesión corporativa esté abierta en esta pestaña." };
+                console.error(error);
+                return { respuesta: "Error al procesar el video. Asegúrate de tener acceso a la carpeta corporativa y que la API Key sea válida." };
               }
             }
           );
         });
     </script>
 
-    <!-- Widget Visual del Chat -->
     <chat-messenger url-allowlist="*">
       <chat-messenger-container
         chat-title="Prueba"
