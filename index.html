@@ -12,12 +12,13 @@
 <body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f6f9;">
 
     <div style="max-width: 600px; margin: 150px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h1 style="color: #1a73e8; margin-bottom: 10px;">🚀 Chat v2 Activo (Sin reCAPTCHA)</h1>
-        <p style="color: #5f6368; font-size: 16px;">Prueba interactuar libremente con el bot abajo a la derecha.</p>
+        <h1 style="color: #1a73e8; margin-bottom: 10px;">🚀 Chat v2 Activo</h1>
+        <p style="color: #5f6368; font-size: 16px;">Conexión directa a Google Drive mediante credenciales del navegador.</p>
     </div>
 
     <script>
         window.addEventListener("chat-messenger-loaded", () => {
+          // Conexión nativa con tu agente de Dialogflow CX
           chatSdk.registerContext(
             chatSdk.prebuilts.ces.createContext({
               deploymentName: "projects/86171080709/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/deployments/aa99e708-daf9-450d-9816-c9694ff7e02d",
@@ -27,6 +28,65 @@
               }
             }),
           );
+
+          // INTERCEPTOR DE SEÑAL: Se ejecuta cuando el bot solicita procesar el video
+          chatSdk.onClientFunctionExecuted("obtener_video_drive", async (event) => {
+            const preguntaUsuario = event.parameters.pregunta;
+            
+            // ID exacto extraído de tu enlace de Drive corporativo
+            const ID_CARPETA_DRIVE = "19UzWlR5bdEEMy9_uLW68yUGJZHQ_8Pcz"; 
+
+            try {
+              // 1. Buscar el video más reciente en tu carpeta usando tu sesión activa de Enersinc
+              const responseDrive = await fetch(`https://www.googleapis.com/drive/v3/files?q='${ID_CARPETA_DRIVE}'+in+parents+and+mimeType+contains+'video/'&orderBy=modifiedTime+desc&pageSize=1`, {
+                 headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
+              });
+              const dataDrive = await responseDrive.json();
+              
+              if (!dataDrive.files || dataDrive.files.length === 0) {
+                 return { respuesta: "No encontré archivos de video en la carpeta de Drive vinculada." };
+              }
+
+              const fileId = dataDrive.files[0].id;
+
+              // 2. Descargar el archivo binario (Blob) usando tus permisos de red locales
+              const resVideo = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                 headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
+              });
+              const videoBlob = await resVideo.blob();
+
+              // 3. Codificar el archivo en Base64 para que Gemini lo pueda procesar en caliente
+              const reader = new FileReader();
+              const base64Video = await new Promise((resolve) => {
+                 reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                 reader.readAsDataURL(videoBlob);
+              });
+
+              // INSTRUCCIONES DE ALTA PRECISIÓN: Le inyectamos las reglas directamente a Gemini junto al archivo
+              const megaPromptDedicado = `
+                DIRECTRICES DE ANÁLISIS DE ALTA FIDELIDAD PARA VIDEOS LARGOS:
+                Estás analizando un video técnico y procedimental de la empresa. Procesa el archivo adjunto bajo este estricto protocolo:
+                
+                1. ESCANEO DEL 100% DE LA LÍNEA DE TIEMPO: Revisa el video completo de principio a fin. No omitas información del medio ni del final.
+                2. ENFOQUE MULTIMODAL: Correlaciona el audio (lo que dice el expositor) con lo visual (textos en pantalla, clics del cursor, diapositivas).
+                3. RESPUESTA ULTRA-CONCRETA: Prohibido usar introducciones largas o resúmenes genéricos. Ve directo al grano.
+                4. MARCAS DE TIEMPO OBLIGATORIAS: Toda afirmación, regla o paso operativo debe incluir su estampa de tiempo exacta entre corchetes, formateada como [Minuto MM:SS] o [Hora HH:MM:SS].
+                5. PASO A PASO INDEXADO: Si te piden un proceso, estructúralo en una lista ordenada (1., 2., 3.) detallando qué botón presionar o qué campo llenar según el video.
+                6. CONTROL DE ALUCINACIONES: Si la duda no se responde textualmente en el video, di: "Ese detalle específico no se encuentra documentado en el video analizado". No inventes nada.
+
+                Pregunta del usuario a resolver: ${preguntaUsuario}
+              `;
+
+              // Retornamos el payload multimodal completo al motor de IA
+              return { 
+                 inlineData: { data: base64Video, mimeType: "video/mp4" },
+                 prompt: megaPromptDedicado
+              };
+
+            } catch (error) {
+              return { respuesta: "Error de autenticación: Asegúrate de tener iniciada tu sesión corporativa en este navegador y estar en la misma pestaña." };
+            }
+          });
         });
     </script>
 
