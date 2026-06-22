@@ -30,7 +30,7 @@
           );
 
           // INTERCEPTOR DE SEÑAL: Se ejecuta cuando el bot solicita procesar el video
-          chatSdk.onClientFunctionExecuted("obtener_video_drive", async (event) => {
+          chatSdk.onClientFunctionExecuted("obtener_video", async (event) => {
             const preguntaUsuario = event.parameters.pregunta;
             
             // ID exacto extraído de tu enlace de Drive corporativo
