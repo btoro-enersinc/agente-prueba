@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entorno de Pruebas v2 - Mi Agente IA</title>
 
+    <!-- Librerías oficiales del Chat de Google -->
     <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
@@ -29,9 +30,10 @@
             }),
           );
 
-          // INTERCEPTOR DE SEÑAL: Se ejecuta cuando el bot solicita procesar el video
-          chatSdk.onClientFunctionExecuted("obtener_video", async (event) => {
-            const preguntaUsuario = event.parameters.pregunta;
+          // === COMANDO CORREGIDO: Registramos la función usando la sintaxis nativa del SDK ===
+          chatSdk.registerClientFunction("obtener_video_drive", async (parameters) => {
+            // El SDK pasa los parámetros directamente en el primer argumento
+            const preguntaUsuario = parameters.pregunta;
             
             // ID exacto extraído de tu enlace de Drive corporativo
             const ID_CARPETA_DRIVE = "19UzWlR5bdEEMy9_uLW68yUGJZHQ_8Pcz"; 
@@ -77,19 +79,19 @@
                 Pregunta del usuario a resolver: ${preguntaUsuario}
               `;
 
-              // Retornamos el payload multimodal completo al motor de IA
               return { 
                  inlineData: { data: base64Video, mimeType: "video/mp4" },
                  prompt: megaPromptDedicado
               };
 
             } catch (error) {
-              return { respuesta: "Error de autenticación: Asegúrate de tener iniciada tu sesión corporativa en este navegador y estar en la misma pestaña." };
+              return { respuesta: "Error de autenticación o lectura en Google Drive. Asegúrate de estar logueado en Drive en esta misma pestaña corporativa." };
             }
           });
         });
     </script>
 
+    <!-- Widget Visual del Chat -->
     <chat-messenger url-allowlist="*">
       <chat-messenger-container
         chat-title="Prueba"
