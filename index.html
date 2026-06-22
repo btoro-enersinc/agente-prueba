@@ -41,25 +41,38 @@
               const ID_CARPETA_DRIVE = "19UzWlR5bdEEMy9_uLW68yUGJZHQ_8Pcz"; 
 
               try {
-                // 1. Buscar el video más reciente en Google Drive
-                const responseDrive = await fetch(`https://www.googleapis.com/drive/v3/files?q='${ID_CARPETA_DRIVE}'+in+parents+and+mimeType+contains+'video/'&orderBy=modifiedTime+desc&pageSize=1`, {
+                // 1. Buscar el archivo (o acceso directo) más reciente en Google Drive
+                // Quitamos el filtro estricto de mimeType para que lea el shortcut
+                const responseDrive = await fetch(`https://www.googleapis.com/drive/v3/files?q='${ID_CARPETA_DRIVE}'+in+parents&fields=files(id,name,mimeType,shortcutDetails)&orderBy=modifiedTime+desc&pageSize=1`, {
                    headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
                 });
                 const dataDrive = await responseDrive.json();
                 
                 if (!dataDrive.files || dataDrive.files.length === 0) {
-                   return { respuesta: "No encontré archivos de video en la carpeta de Drive vinculada." };
+                   return { respuesta: "No encontré archivos en la carpeta de Drive vinculada." };
                 }
 
-                const fileId = dataDrive.files[0].id;
+                const detectedFile = dataDrive.files[0];
+                let fileId = detectedFile.id;
 
-                // 2. Descargar el archivo de video (Blob)
+                // SI ES UN ACCESO DIRECTO, REDIRECCIONAMOS EL ID AL ARCHIVO REAL
+                if (detectedFile.mimeType === 'application/vnd.google-apps.shortcut' && detectedFile.shortcutDetails) {
+                   console.log(`Acceso directo detectado. Apuntando al ID original: ${detectedFile.shortcutDetails.targetId}`);
+                   fileId = detectedFile.shortcutDetails.targetId;
+                }
+
+                // 2. Descargar el archivo binario real utilizando el ID correcto (Blob)
                 const resVideo = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
                    headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
                 });
+                
+                if (!resVideo.ok) {
+                   return { respuesta: "No pude descargar el archivo de video original. Asegúrate de tener permisos de lectura en la ubicación de origen del video." };
+                }
+                
                 const videoBlob = await resVideo.blob();
 
-                // 3. Convertir a Base64
+                // 3. Convertir el archivo a Base64
                 const reader = new FileReader();
                 const base64Video = await new Promise((resolve) => {
                    reader.onloadend = () => resolve(reader.result.split(',')[1]);
@@ -67,7 +80,7 @@
                 });
 
                 // 4. LLAMADA DIRECTA A GEMINI DESDE EL CLIENTE
-                // Reemplaza AQUÍ con tu API Key de Google AI Studio o Vertex AI
+                // Recuerda colocar tu API Key real de Google AI Studio / Vertex AI aquí abajo
                 const API_KEY_GEMINI = "TU_API_KEY_DE_GEMINI"; 
                 const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`;
 
@@ -100,7 +113,7 @@
 
                 const dataGemini = await resGemini.json();
                 
-                // Extraemos el texto que generó Gemini al ver el video
+                // Extraemos el texto que generó Gemini al analizar el video original
                 const textoRespuesta = dataGemini.candidates[0].content.parts[0].text;
 
                 // 5. DEVOLVER LA RESPUESTA FINAL EN TEXTO A DIALOGFLOW CX
@@ -108,7 +121,7 @@
 
               } catch (error) {
                 console.error(error);
-                return { respuesta: "Error al procesar el video. Asegúrate de tener acceso a la carpeta corporativa y que la API Key sea válida." };
+                return { respuesta: "Error al procesar el video de Drive. Revisa la consola del navegador para más detalles." };
               }
             }
           );
