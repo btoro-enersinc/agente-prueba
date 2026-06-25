@@ -11,13 +11,12 @@
 
     <style>
         chat-messenger {
-            /* Paleta de colores personalizados */
-            --df-messenger-brand-color: #4da6ff; /* Azul clarito para la burbuja flotante y detalles */
+            --df-messenger-brand-color: #4da6ff; /* Azul clarito */
             --df-messenger-header-background-color: #e6f2ff; /* Fondo azul suave del encabezado */
             --df-messenger-header-title-color: #003366; /* Texto oscuro del título */
             --df-messenger-chat-window-background: #ffffff; /* Fondo blanco del chat */
-            --df-messenger-agent-message-background: #f0f7ff; /* Burbujas de la IA en azul pastel */
-            --df-messenger-user-message-background: #e6f2ff; /* Burbujas del usuario en azul claro */
+            --df-messenger-agent-message-background: #f0f7ff; /* Mensajes de la IA */
+            --df-messenger-user-message-background: #e6f2ff; /* Mensajes del usuario */
         }
     </style>
 </head>
@@ -30,7 +29,6 @@
 
     <script>
         window.addEventListener("chat-messenger-loaded", () => {
-          // Conexión nativa con tu agente de Dialogflow CX (Tu código oficial)
           chatSdk.registerContext(
             chatSdk.prebuilts.ces.createContext({
               deploymentName: "projects/86171080709/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/deployments/aa99e708-daf9-450d-9816-c9694ff7e02d",
@@ -41,14 +39,14 @@
             }),
           );
 
-          // Buscar el componente correcto
+          // Buscar el chat-messenger para registrar la función
           const chatMessenger = document.querySelector('chat-messenger');
           
-          // Tu lógica intacta para interceptar el video de Drive y mandarlo a Gemini
           chatMessenger.registerClientSideFunction(
             'projects/automatizaciones-ia-20260420/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/tools/356156e1-3a6a-4487-bf85-cf8801cac24c',
             '356156e1-3a6a-4487-bf85-cf8801cac24c',
             async (args) => {
+              
               console.log('¡Señal de video interceptada con éxito!', {args});
               const preguntaUsuario = args.pregunta;
               const ID_CARPETA_DRIVE = "19UzWlR5bdEEMy9_uLW68yUGJZHQ_8Pcz"; 
@@ -137,9 +135,9 @@
         enable-file-upload
         enable-audio-input
       >
-        <chat-reset-session-button slot="titlebar-actions" title-text="Comenzar nuevo chat"></chat-reset-session-button>
-        <chat-toggle-dialog-button slot="titlebar-actions" title-text-expanded="Minimizar" title-text-collapsed="Expandir"></chat-toggle-dialog-button>
-        <chat-messenger-close-button slot="titlebar-actions" title-text="Cerrar"></chat-messenger-close-button>
+        <chat-reset-session-button slot="titlebar-actions" title-text="Start new chat"></chat-reset-session-button>
+        <chat-toggle-dialog-button slot="titlebar-actions" title-text-expanded="Collapse" title-text-collapsed="Expand"></chat-toggle-dialog-button>
+        <chat-messenger-close-button slot="titlebar-actions" title-text="Close"></chat-messenger-close-button>
       </chat-messenger-container>
     </chat-messenger>
 
