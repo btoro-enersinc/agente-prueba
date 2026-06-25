@@ -3,16 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entorno de Pruebas v2 - Mi Agente IA</title>
+    <title>Entorno de Pruebas v2 - Agente Regulatorio</title>
 
     <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
+
+    <style>
+        chat-messenger {
+            z-index: 9999;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            
+            /* Paleta de colores personalizados */
+            --df-messenger-brand-color: #4da6ff; /* Azul clarito para el botón flotante y elementos destacados */
+            --df-messenger-header-background-color: #e6f2ff; /* Fondo azul muy suave para el encabezado */
+            --df-messenger-header-title-color: #003366; /* Texto oscuro para máxima legibilidad */
+            --df-messenger-chat-window-background: #ffffff; /* Fondo blanco de la ventana de chat */
+            --df-messenger-agent-message-background: #f0f7ff; /* Burbujas de la IA en azul pastel */
+            --df-messenger-user-message-background: #e6f2ff; /* Burbujas del usuario en azul claro */
+        }
+    </style>
 </head>
 <body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f6f9;">
 
     <div style="max-width: 600px; margin: 150px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h1 style="color: #1a73e8; margin-bottom: 10px;">🚀 Chat v2 Activo</h1>
+        <h1 style="color: #4da6ff; margin-bottom: 10px;">🚀 Agente Regulatorio Activo</h1>
         <p style="color: #5f6368; font-size: 16px;">Conexión directa a Google Drive mediante credenciales del navegador.</p>
     </div>
 
@@ -42,7 +59,6 @@
 
               try {
                 // 1. Buscar el archivo (o acceso directo) más reciente en Google Drive
-                // Quitamos el filtro estricto de mimeType para que lea el shortcut
                 const responseDrive = await fetch(`https://www.googleapis.com/drive/v3/files?q='${ID_CARPETA_DRIVE}'+in+parents&fields=files(id,name,mimeType,shortcutDetails)&orderBy=modifiedTime+desc&pageSize=1`, {
                    headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
                 });
@@ -80,7 +96,6 @@
                 });
 
                 // 4. LLAMADA DIRECTA A GEMINI DESDE EL CLIENTE
-                // Recuerda colocar tu API Key real de Google AI Studio / Vertex AI aquí abajo
                 const API_KEY_GEMINI = "TU_API_KEY_DE_GEMINI"; 
                 const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`;
 
@@ -130,14 +145,14 @@
 
     <chat-messenger url-allowlist="*">
       <chat-messenger-container
-        chat-title="Prueba"
+        chat-title="Agente Regulatorio"
         chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
         enable-file-upload
         enable-audio-input
       >
-        <chat-reset-session-button slot="titlebar-actions" title-text="Start new chat"></chat-reset-session-button>
-        <chat-toggle-dialog-button slot="titlebar-actions" title-text-expanded="Collapse" title-text-collapsed="Expand"></chat-toggle-dialog-button>
-        <chat-messenger-close-button slot="titlebar-actions" title-text="Close"></chat-messenger-close-button>
+        <chat-reset-session-button slot="titlebar-actions" title-text="Comenzar nuevo chat"></chat-reset-session-button>
+        <chat-toggle-dialog-button slot="titlebar-actions" title-text-expanded="Minimizar" title-text-collapsed="Expandir"></chat-toggle-dialog-button>
+        <chat-messenger-close-button slot="titlebar-actions" title-text="Cerrar"></chat-messenger-close-button>
       </chat-messenger-container>
     </chat-messenger>
 
