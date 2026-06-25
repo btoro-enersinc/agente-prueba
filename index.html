@@ -1,160 +1,19 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entorno de Pruebas v2 - Agente Regulatorio</title>
-
-    <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
-    <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
-    <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
-
-    <style>
+<style>
         chat-messenger {
-            z-index: 9999;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+            display: block !important;
+            z-index: 9999 !important;
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            width: 310px !important; /* Ajusta el ancho del contenedor del botón flotante */
+            height: 70px !important; /* Ajusta la altura del contenedor del botón flotante */
             
             /* Paleta de colores personalizados */
-            --df-messenger-brand-color: #4da6ff; /* Azul clarito para el botón flotante y elementos destacados */
-            --df-messenger-header-background-color: #e6f2ff; /* Fondo azul muy suave para el encabezado */
-            --df-messenger-header-title-color: #003366; /* Texto oscuro para máxima legibilidad */
-            --df-messenger-chat-window-background: #ffffff; /* Fondo blanco de la ventana de chat */
+            --df-messenger-brand-color: #4da6ff; /* Azul clarito para la burbuja flotante y detalles */
+            --df-messenger-header-background-color: #e6f2ff; /* Fondo azul suave del encabezado */
+            --df-messenger-header-title-color: #003366; /* Texto oscuro del encabezado */
+            --df-messenger-chat-window-background: #ffffff; /* Fondo blanco del chat */
             --df-messenger-agent-message-background: #f0f7ff; /* Burbujas de la IA en azul pastel */
             --df-messenger-user-message-background: #e6f2ff; /* Burbujas del usuario en azul claro */
         }
     </style>
-</head>
-<body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f4f6f9;">
-
-    <div style="max-width: 600px; margin: 150px auto; text-align: center; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-        <h1 style="color: #4da6ff; margin-bottom: 10px;">🚀 Agente Regulatorio Activo</h1>
-        <p style="color: #5f6368; font-size: 16px;">Conexión directa a Google Drive mediante credenciales del navegador.</p>
-    </div>
-
-    <script>
-        window.addEventListener("chat-messenger-loaded", () => {
-          // Conexión nativa con tu agente de Dialogflow CX
-          chatSdk.registerContext(
-            chatSdk.prebuilts.ces.createContext({
-              deploymentName: "projects/86171080709/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/deployments/aa99e708-daf9-450d-9816-c9694ff7e02d",
-              tokenBroker: {
-                enableTokenBroker: true,
-                enableRecaptcha: false
-              }
-            }),
-          );
-
-          const chatMessenger = document.querySelector('chat-messenger');
-          
-          chatMessenger.registerClientSideFunction(
-            'projects/automatizaciones-ia-20260420/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/tools/356156e1-3a6a-4487-bf85-cf8801cac24c',
-            '356156e1-3a6a-4487-bf85-cf8801cac24c',
-            async (args) => {
-              
-              console.log('¡Señal de video interceptada con éxito!', {args});
-              const preguntaUsuario = args.pregunta;
-              const ID_CARPETA_DRIVE = "19UzWlR5bdEEMy9_uLW68yUGJZHQ_8Pcz"; 
-
-              try {
-                // 1. Buscar el archivo (o acceso directo) más reciente en Google Drive
-                const responseDrive = await fetch(`https://www.googleapis.com/drive/v3/files?q='${ID_CARPETA_DRIVE}'+in+parents&fields=files(id,name,mimeType,shortcutDetails)&orderBy=modifiedTime+desc&pageSize=1`, {
-                   headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
-                });
-                const dataDrive = await responseDrive.json();
-                
-                if (!dataDrive.files || dataDrive.files.length === 0) {
-                   return { respuesta: "No encontré archivos en la carpeta de Drive vinculada." };
-                }
-
-                const detectedFile = dataDrive.files[0];
-                let fileId = detectedFile.id;
-
-                // SI ES UN ACCESO DIRECTO, REDIRECCIONAMOS EL ID AL ARCHIVO REAL
-                if (detectedFile.mimeType === 'application/vnd.google-apps.shortcut' && detectedFile.shortcutDetails) {
-                   console.log(`Acceso directo detectado. Apuntando al ID original: ${detectedFile.shortcutDetails.targetId}`);
-                   fileId = detectedFile.shortcutDetails.targetId;
-                }
-
-                // 2. Descargar el archivo binario real utilizando el ID correcto (Blob)
-                const resVideo = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                   headers: { 'Authorization': `Bearer ${gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token}` }
-                });
-                
-                if (!resVideo.ok) {
-                   return { respuesta: "No pude descargar el archivo de video original. Asegúrate de tener permisos de lectura en la ubicación de origen del video." };
-                }
-                
-                const videoBlob = await resVideo.blob();
-
-                // 3. Convertir el archivo a Base64
-                const reader = new FileReader();
-                const base64Video = await new Promise((resolve) => {
-                   reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                   reader.readAsDataURL(videoBlob);
-                });
-
-                // 4. LLAMADA DIRECTA A GEMINI DESDE EL CLIENTE
-                const API_KEY_GEMINI = "TU_API_KEY_DE_GEMINI"; 
-                const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY_GEMINI}`;
-
-                const megaPrompt = `
-                  DIRECTRICES DE ANÁLISIS DE ALTA FIDELIDAD PARA VIDEOS LARGOS:
-                  Estás analizando un video técnico de la empresa. Procesa el archivo adjunto bajo este estricto protocolo:
-                  1. ESCANEO DEL 100%: Revisa el video completo de principio a fin, incluyendo partes medias y finales.
-                  2. ENFOQUE MULTIMODAL: Correlaciona el audio (voz) con lo visual (textos en pantalla, diapositivas y clics del cursor).
-                  3. MARCAS DE TIEMPO OBLIGATORIAS: Toda afirmación o paso debe incluir su estampa de tiempo exacta entre corchetes, formateada como [Minuto MM:SS] o [Hora HH:MM:SS].
-                  4. PASO A PASO INDEXADO: Estructura la respuesta en una lista ordenada (1., 2., 3.) detallando las acciones.
-                  5. CONTROL DE ALUCINACIONES: Si la duda no está en el video, di: "Ese detalle específico no se encuentra documentado en el video analizado".
-                  
-                  Pregunta a resolver: ${preguntaUsuario}
-                `;
-
-                const payload = {
-                  contents: [{
-                    parts: [
-                      { inlineData: { data: base64Video, mimeType: "video/mp4" } },
-                      { text: megaPrompt }
-                    ]
-                  }]
-                };
-
-                const resGemini = await fetch(urlGemini, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload)
-                });
-
-                const dataGemini = await resGemini.json();
-                
-                // Extraemos el texto que generó Gemini al analizar el video original
-                const textoRespuesta = dataGemini.candidates[0].content.parts[0].text;
-
-                // 5. DEVOLVER LA RESPUESTA FINAL EN TEXTO A DIALOGFLOW CX
-                return { respuesta: textoRespuesta };
-
-              } catch (error) {
-                console.error(error);
-                return { respuesta: "Error al procesar el video de Drive. Revisa la consola del navegador para más detalles." };
-              }
-            }
-          );
-        });
-    </script>
-
-    <chat-messenger url-allowlist="*">
-      <chat-messenger-container
-        chat-title="Agente Regulatorio"
-        chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
-        enable-file-upload
-        enable-audio-input
-      >
-        <chat-reset-session-button slot="titlebar-actions" title-text="Comenzar nuevo chat"></chat-reset-session-button>
-        <chat-toggle-dialog-button slot="titlebar-actions" title-text-expanded="Minimizar" title-text-collapsed="Expandir"></chat-toggle-dialog-button>
-        <chat-messenger-close-button slot="titlebar-actions" title-text="Cerrar"></chat-messenger-close-button>
-      </chat-messenger-container>
-    </chat-messenger>
-
-</body>
-</html>
