@@ -1,11 +1,13 @@
-<script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
+<script defer
+  src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js">
+</script>
 <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
-<link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css"> 
+<link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
 <script>
     window.addEventListener("chat-messenger-loaded", () => {
       chatSdk.registerContext(
         chatSdk.prebuilts.ces.createContext({
-          deploymentName: "projects/86171080709/locations/us/apps/d833aebf-00d4-46ec-b9ab-2be3e85f4d46/deployments/aa99e708-daf9-450d-9816-c9694ff7e02d",
+          deploymentName: "projects/86171080709/locations/us/apps/0960cf45-c1b8-4f43-b639-7c794e61c68b/deployments/dedd082e-1b2e-4984-b1a1-495a48598ba0",
           tokenBroker: {
             enableTokenBroker: true,
             enableRecaptcha: false
@@ -14,12 +16,14 @@
       );
     });
 </script>
-<chat-messenger url-allowlist="*">
+<!-- Update the url-allowlist attribute with a comma-separated list of origins allowed to render images -->
+<chat-messenger
+  url-allowlist="*"
+>
   <chat-messenger-container
-    chat-title="Agente Regulatorio"
+    chat-title="AGENTE ESTRATEGICO"
     chat-title-icon="https://gstatic.com/dialogflow-console/common/assets/ccai-favicons/conversational_agents.png"
     enable-file-upload
-    enable-audio-input
   >
     <chat-reset-session-button
       slot="titlebar-actions"
