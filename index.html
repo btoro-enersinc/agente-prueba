@@ -13,8 +13,8 @@
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            /* Dejamos un espacio a la derecha para que la tarjeta blanca no choque con el chat */
-            padding: 50px 550px 50px 50px; 
+            /* Espacio a la derecha para que la tarjeta blanca no choque con todo el sistema de chat */
+            padding: 50px 580px 50px 50px; 
             background-color: #f4f6f9;
             color: #333;
             display: flex;
@@ -48,19 +48,27 @@
             margin: 0;
         }
 
-        /* UBICACIÓN DE LA BURBUJA NEGRA (La X) */
+        /* =======================================================
+           CONFIGURACIÓN DE LA UBICACIÓN DEL CHAT Y LA BURBUJA
+        ======================================================= */
         chat-messenger {
             position: fixed !important;
             right: 30px !important;
             bottom: 30px !important;
             z-index: 9999;
             
-            /* Configuramos tamaños nativos en el padre */
+            /* Ajustamos el tamaño del chat */
             --df-messenger-chat-window-height: 600px;
             --df-messenger-chat-window-width: 420px;
+
+            /* USAMOS LAS VARIABLES OFICIALES DEL SDK PARA MOVER LA VENTANA */
+            /* 85px empuja la ventana hacia la izquierda lo justo para no tapar la burbuja */
+            --df-messenger-chat-window-offset-x: 85px; 
+            /* 0px la deja perfectamente nivelada en altura con el botón circular */
+            --df-messenger-chat-window-offset-y: 0px; 
         }
 
-        /* Si el zoom es muy alto o la pantalla es pequeña, adaptamos el espacio */
+        /* Responsivo en caso de pantallas muy compactas o zoom extremo */
         @media (max-width: 1100px) {
             body {
                 padding: 40px;
@@ -93,18 +101,11 @@
             }),
           );
 
+          // Ajustamos únicamente el scroll del cuadro de mensajes por dentro
           const infoChat = document.querySelector('chat-messenger');
           if (infoChat && infoChat.shadowRoot) {
               const style = document.createElement('style');
               style.textContent = `
-                  /* MOVEMOS EL CHAT A UN LADO DE LA BURBUJA */
-                  .df-messenger-wrapper {
-                      right: 90px !important; /* Lo empuja a la izquierda, dejando libre la X */
-                      bottom: 0px !important; /* Lo nivela a la misma altura inferior de la burbuja */
-                      height: 600px !important;
-                      max-height: 85vh !important;
-                  }
-                  
                   df-messenger-chat {
                       height: 100% !important;
                       max-height: 100% !important;
