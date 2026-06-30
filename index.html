@@ -45,7 +45,7 @@
             margin: 0;
         }
 
-        /* FUERZA LA UBICACIÓN GENERAL DE LA BURBUJA Y LA VENTANA */
+        /* UBICACIÓN GENERAL DE LA BURBUJA */
         chat-messenger {
             position: fixed !important;
             right: 30px !important;
@@ -62,7 +62,6 @@
 
     <script>
         window.addEventListener("chat-messenger-loaded", () => {
-          // 1. Registro del contexto original de Dialogflow
           chatSdk.registerContext(
             chatSdk.prebuilts.ces.createContext({
               deploymentName: "projects/86171080709/locations/us/apps/0960cf45-c1b8-4f43-b639-7c794e61c68b/deployments/dedd082e-1b2e-4984-b1a1-495a48598ba0",
@@ -73,20 +72,25 @@
             }),
           );
 
-          // 2. CÓDIGO MAESTRO: Forzar que la ventana sea gorda y se mueva al lado de la burbuja
+          // SOLUCIÓN AL CORTE DE TEXTO: Forzar dimensiones y activar el scroll interno
           const infoChat = document.querySelector('chat-messenger');
           if (infoChat && infoChat.shadowRoot) {
               const style = document.createElement('style');
               style.textContent = `
-                  /* Hace la ventana del chat mucho más ancha y alta */
+                  /* Define el tamaño de la ventana completa y la mueve a la izquierda de la X */
                   .df-messenger-wrapper {
-                      width: 550px !important; 
-                      height: 700px !important;
-                      max-height: 85vh !important;
-                      
-                      /* Desplaza la ventana a la izquierda para dejar la burbuja libre abajo a la derecha */
+                      width: 520px !important; 
+                      height: 650px !important;
+                      max-height: 80vh !important;
                       right: 80px !important; 
                       bottom: 20px !important;
+                  }
+                  
+                  /* Fuerza a la caja interna del chat a respetar la altura y activar la barra de scroll */
+                  df-messenger-chat {
+                      height: 100% !important;
+                      max-height: 100% !important;
+                      overflow-y: auto !important;
                   }
               `;
               infoChat.shadowRoot.appendChild(style);
