@@ -13,16 +13,19 @@
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 50px;
+            /* Dejamos un espacio a la derecha para que la tarjeta no choque con el chat */
+            padding: 50px 480px 50px 50px; 
             background-color: #f4f6f9;
             color: #333;
             display: flex;
             align-items: center;
             min-height: 80vh;
+            box-sizing: border-box;
         }
         
         .contenedor-bienvenida {
-            max-width: 600px;
+            max-width: 550px;
+            width: 100%;
             background: white;
             padding: 40px;
             border-radius: 16px;
@@ -45,11 +48,37 @@
             margin: 0;
         }
 
-        /* UBICACIÓN GENERAL DE LA BURBUJA */
+        /* =======================================================
+           SOLUCIÓN PARA LA BURBUJA Y EL CHAT GENERAL
+        ======================================================= */
         chat-messenger {
             position: fixed !important;
             right: 30px !important;
-            bottom: 30px !important;
+            bottom: 40px !important; /* Subimos el componente completo para que la burbuja no se corte abajo */
+            z-index: 9999;
+            
+            /* Configuramos las variables CSS nativas que acepta el componente de Google */
+            --df-messenger-chat-window-height: 600px;
+            --df-messenger-chat-window-width: 420px;
+        }
+
+        /* Responsivo básico si subes mucho el zoom */
+        @media (max-width: 1100px) {
+            body {
+                padding: 40px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .contenedor-bienvenida {
+                max-width: 100%;
+                margin-bottom: 40px;
+            }
+            chat-messenger {
+                /* Si la pantalla es muy chica, le permitimos usar menos ancho */
+                --df-messenger-chat-window-width: 85vw;
+                right: 20px !important;
+                bottom: 20px !important;
+            }
         }
     </style>
 </head>
@@ -72,21 +101,17 @@
             }),
           );
 
-          // SOLUCIÓN AL CORTE DE TEXTO: Forzar dimensiones y activar el scroll interno
+          // Ajustes internos dentro del Shadow DOM
           const infoChat = document.querySelector('chat-messenger');
           if (infoChat && infoChat.shadowRoot) {
               const style = document.createElement('style');
               style.textContent = `
-                  /* Define el tamaño de la ventana completa y la mueve a la izquierda de la X */
+                  /* Centra la ventana del chat perfectamente alineada con la burbuja */
                   .df-messenger-wrapper {
-                      width: 700px !important; 
-                      height: 300px !important;
-                      max-height: 80vh !important;
-                      right: 50px !important; 
-                      bottom: 20px !important;
+                      right: 0px !important; 
+                      bottom: 75px !important; /* Despega la ventana abierta por encima del botón de la X */
                   }
                   
-                  /* Fuerza a la caja interna del chat a respetar la altura y activar la barra de scroll */
                   df-messenger-chat {
                       height: 100% !important;
                       max-height: 100% !important;
