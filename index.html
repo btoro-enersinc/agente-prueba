@@ -11,45 +11,45 @@
 
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 50px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 50px;
             background-color: #f4f6f9;
             color: #333;
+            display: flex;
+            align-items: center;
+            min-height: 80vh;
         }
         
         .contenedor-bienvenida {
-            max-width: 700px;
-            margin-top: 60px;
+            max-width: 600px;
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
         h1 {
-            font-size: 2.3rem;
+            font-size: 2.5rem;
             color: #111;
+            margin-top: 0;
             margin-bottom: 15px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         p {
-            font-size: 1.15rem;
-            color: #555;
+            font-size: 1.2rem;
+            color: #666;
             line-height: 1.6;
             margin: 0;
         }
 
-        /* FUERZA EL ANCHO DEL CHAT Y LO SEPARA DE LA BURBUJA */
+        /* FUERZA LA UBICACIÓN GENERAL DE LA BURBUJA Y LA VENTANA */
         chat-messenger {
-            /* Cambia el ancho definitivo (puedes subirlo a 550px si quieres más ancho) */
-            width: 500px !important; 
-            height: 650px !important;
-            
-            /* Separa la ventana un poco a la izquierda para que no tape la X o la burbuja */
-            right: 25px !important; 
-            bottom: 95px !important;
+            position: fixed !important;
+            right: 30px !important;
+            bottom: 30px !important;
         }
     </style>
 </head>
@@ -62,6 +62,7 @@
 
     <script>
         window.addEventListener("chat-messenger-loaded", () => {
+          // 1. Registro del contexto original de Dialogflow
           chatSdk.registerContext(
             chatSdk.prebuilts.ces.createContext({
               deploymentName: "projects/86171080709/locations/us/apps/0960cf45-c1b8-4f43-b639-7c794e61c68b/deployments/dedd082e-1b2e-4984-b1a1-495a48598ba0",
@@ -71,6 +72,25 @@
               }
             }),
           );
+
+          // 2. CÓDIGO MAESTRO: Forzar que la ventana sea gorda y se mueva al lado de la burbuja
+          const infoChat = document.querySelector('chat-messenger');
+          if (infoChat && infoChat.shadowRoot) {
+              const style = document.createElement('style');
+              style.textContent = `
+                  /* Hace la ventana del chat mucho más ancha y alta */
+                  .df-messenger-wrapper {
+                      width: 550px !important; 
+                      height: 700px !important;
+                      max-height: 85vh !important;
+                      
+                      /* Desplaza la ventana a la izquierda para dejar la burbuja libre abajo a la derecha */
+                      right: 80px !important; 
+                      bottom: 20px !important;
+                  }
+              `;
+              infoChat.shadowRoot.appendChild(style);
+          }
         });
     </script>
 
