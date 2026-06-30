@@ -3,16 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Página con Burbuja de Chat</title>
+    <title>Agente Estratégico</title>
 
     <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
     <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        
+        .contenedor-bienvenida {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* ESTO HACE EL CHAT MÁS ANCHO
+           Modifica el ancho interno del cuadro del chat de Dialogflow 
+        */
+        chat-messenger {
+            --chat-messenger-width: 480px; /* Por defecto viene de 370px, aquí lo ensanchamos */
+            --chat-messenger-max-height: 600px;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Tu sitio web normal</h1>
-    <p>La burbuja aparecerá flotando abajo a la derecha de la pantalla.</p>
+    <div class="contenedor-bienvenida">
+        <h1>AGENTE ESTRATÉGICO</h1>
+        <p>Para interactuar accede a la burbuja del chat. Un equipo de asistentes virtuales está listo para ayudarte.</p>
+    </div>
 
     <script>
         window.addEventListener("chat-messenger-loaded", () => {
