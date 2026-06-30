@@ -11,35 +11,45 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 50px;
+            background-color: #f4f6f9;
             color: #333;
         }
         
         .contenedor-bienvenida {
-            max-width: 800px;
-            margin-top: 50px;
+            max-width: 700px;
+            margin-top: 60px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
         h1 {
-            font-size: 2.5rem;
-            color: #1a1a1a;
-            margin-bottom: 10px;
+            font-size: 2.3rem;
+            color: #111;
+            margin-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         p {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: #555;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin: 0;
         }
 
-        /* ESTO HACE EL CHAT MÁS ANCHO
-           Modifica el ancho interno del cuadro del chat de Dialogflow 
-        */
+        /* FUERZA EL ANCHO DEL CHAT Y LO SEPARA DE LA BURBUJA */
         chat-messenger {
-            --chat-messenger-width: 480px; /* Por defecto viene de 370px, aquí lo ensanchamos */
-            --chat-messenger-max-height: 600px;
+            /* Cambia el ancho definitivo (puedes subirlo a 550px si quieres más ancho) */
+            width: 500px !important; 
+            height: 650px !important;
+            
+            /* Separa la ventana un poco a la izquierda para que no tape la X o la burbuja */
+            right: 25px !important; 
+            bottom: 95px !important;
         }
     </style>
 </head>
