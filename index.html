@@ -1,14 +1,91 @@
-// ELIMINA TODO ESTE BLOQUE
-// Ajustamos únicamente el scroll del cuadro de mensajes por dentro
-const infoChat = document.querySelector('chat-messenger');
-if (infoChat && infoChat.shadowRoot) {
-    const style = document.createElement('style');
-    style.textContent = `
-        df-messenger-chat {
-            height: 100% !important;
-            max-height: 100% !important;
-            overflow-y: auto !important;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente Estratégico</title>
+
+    <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
+    <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">
+    <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-layout.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            /* Espacio a la derecha para que la tarjeta blanca no choque con todo el sistema de chat */
+            padding: 50px 580px 50px 50px; 
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            align-items: center;
+            min-height: 80vh;
+            box-sizing: border-box;
         }
-    `;
-    infoChat.shadowRoot.appendChild(style);
-}
+        
+        .contenedor-bienvenida {
+            max-width: 550px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #111;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* =======================================================
+           CONFIGURACIÓN DE LA UBICACIÓN DEL CHAT Y LA BURBUJA
+        ======================================================= */
+        chat-messenger {
+            position: fixed !important;
+            right: 30px !important;
+            bottom: 30px !important;
+            z-index: 9999;
+            
+            /* Altura dinámica: se ajusta a la pantalla del usuario dejando un margen */
+            --df-messenger-chat-window-height: calc(100vh - 100px);
+            
+            /* Límite para que no sea gigante en pantallas grandes */
+            max-height: 650px; 
+            
+            --df-messenger-chat-window-width: 420px;
+
+            /* Empuja la ventana hacia la izquierda lo justo para no tapar la burbuja */
+            --df-messenger-chat-window-offset-x: 85px; 
+            
+            /* La deja perfectamente nivelada en altura con el botón circular */
+            --df-messenger-chat-window-offset-y: 0px; 
+        }
+
+        /* Responsivo en caso de pantallas muy compactas o zoom extremo */
+        @media (max-width: 1100px) {
+            body {
+                padding: 40px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .contenedor-bienvenida {
+                max-width: 100%;
+                margin-bottom: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-
